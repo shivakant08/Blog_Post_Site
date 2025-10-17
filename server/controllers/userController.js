@@ -38,8 +38,8 @@ export const getAllUsers = async (req, res)=>{
 //Register User
 export const registerUser = async (req, res)=>{
     try {
-        const {name, username, email, password, role} = req.body
-    if(!name || !username || !email || !password){
+        const {name, email, password, role} = req.body
+    if(!name || !email || !password){
         return res.status(400).json({ message: "All fields are required" })
     }
 
@@ -51,7 +51,6 @@ export const registerUser = async (req, res)=>{
 
     const newUser =new User({
         name,
-        username,
         email,
         password:hashedPassword,
         role
@@ -60,6 +59,7 @@ export const registerUser = async (req, res)=>{
     const { password: pw, ...userWithoutPassword } = newUser._doc;
     res.status(201).json({ message: "User registered successfully", user: userWithoutPassword });
     } catch (error) {
+        console.error("Register Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
@@ -86,6 +86,7 @@ export const loginUser = async (req, res)=>{
         return res.status(200).json({message:"Login Successful", token, user: userWithoutPassword})
         
     } catch (error) {
+        console.error("Login Error:", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 
