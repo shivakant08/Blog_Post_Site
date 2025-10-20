@@ -1,46 +1,57 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
 import axios from "axios"
-import {toast} from "react-hot-toast"
+import { toast } from "react-hot-toast"
 import { useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
-const [formData, setFormData] = useState({
-  name:"",
-  email:"",
-  password:"",
-  role:""
-})
+  const { login, signup } = useContext(AuthContext)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: ""
+  })
+  const [showPassword, setShowPassword] = useState(false)
 
-const handleChange = (e)=>{
-  setFormData(prev=>({...prev, [e.target.name]: e.target.value}))
-}
-
-const handleSubmit = async (e)=>{
-  e.preventDefault()
-
-  try {
-    if(type === "signup"){
-      const res = await axios.post("http://localhost:5000/v1/api/register", formData)
-      toast.success(res.data.message)
-      onSwitch("signin")
-    }else{
-      const res = await axios.post("http://localhost:5000/v1/api/login",{
-        email:formData.email,
-        password:formData.password
-      })
-
-      localStorage.setItem("token", res.data.token)
-      localStorage.setItem("user", JSON.stringify(res.data.user))
-      toast.success(res.data.message)
-      onClose()
-      window.location.reload()
-    }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "Something went wrong")
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
-}
+
+  const togglePassword = () => setShowPassword(prev => !prev)
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      if (type === "signup") {
+        const res = await axios.post("http://localhost:5000/v1/api/register", formData)
+        signup(res.data.user, res.data.token, res.data.message)
+        onSwitch("signin")
+      } else {
+        const res = await axios.post("http://localhost:5000/v1/api/login", {
+          email: formData.email,
+          password: formData.password
+        })
+
+        login(res.data.user, res.data.token, res.data.message)
+        onClose()
+
+      }
+    } catch (error) {
+      // Handle error messages from server
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.status === 401) {
+        toast.error("Invalid credentials. Please try again.");
+      } else {
+        toast.error("Something went wrong. Please try again later.");
+      }
+    }
+  }
 
   if (!isOpen) return null;
 
@@ -87,6 +98,7 @@ const handleSubmit = async (e)=>{
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Full Name"
+                  autoComplete='name'
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none text-gray-800 placeholder-gray-500 bg-white/95"
                 />
               )}
@@ -97,6 +109,7 @@ const handleSubmit = async (e)=>{
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Email Address"
+                autoComplete='email'
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none text-gray-800 placeholder-gray-500 bg-white/95"
               />
 
@@ -104,7 +117,7 @@ const handleSubmit = async (e)=>{
               {type === "signup" && (
                 <div className="relative">
                   <select
-                    
+
                     name='role'
                     value={formData.role}
                     onChange={handleChange}
@@ -127,15 +140,52 @@ const handleSubmit = async (e)=>{
                   </div>
                 </div>
               )}
+              <div className='relative'>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name='password'
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  autoComplete={type === "signup" ? "new-password" : "current-password"}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none text-gray-800 placeholder-gray-500 bg-white/95"
+                />
 
-              <input
-                type="password"
-                name='password'
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-400 outline-none text-gray-800 placeholder-gray-500 bg-white/95"
-              />
+
+                {/* <button
+                type='button'
+                onClick={togglePassword}
+                className='absolute right-3 top-1/2 text-gray-500 hover:text-gray-700'>
+                  {showPassword ? <FaEyeSlash size={18}/>:<FaEye size={18}/>}
+                </button> */}
+
+                <div className='absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer'>
+                  <AnimatePresence exitBeforeEnter>
+                    {showPassword ? (
+                      <motion.div
+                        key="eye-slash"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => setShowPassword(false)}>
+                        <FaEyeSlash size={18} className='text-gray-500 hover:text-gray-700' />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="eye"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => setShowPassword(true)}
+                      >
+                        <FaEye size={18} className='text-gray-500 hover:text-gray-700' />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
 
               {/* Submit */}
               <button
