@@ -1,93 +1,328 @@
+// import { OAuth2Client } from "google-auth-library"
+// import bcrypt from "bcrypt";
+// import jwt from "jsonwebtoken"
+// import dotenv from "dotenv"
+// dotenv.config()
+// import User from "../Model/User.js";
 
+// const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+
+// //Goggle Sign in / Sign in'
+
+// // export const googleSignIn = async (req, res)=>{
+// //     try {
+// //         const {tokenId} = req.body
+// //         const ticket = await client.verifyIdToken({
+// //             idToken:tokenId,
+// //             audience:process.env.GOOGLE_CLIENT_ID
+// //         })
+
+// //         const {email_verified, name, email, picture} = ticket.getPayload()
+// //         if(!email_verified){
+// //             return res.status(400).json({message: "Google email not verified"})
+// //         }
+
+// //         let user = await User.findOne({email})
+
+// //         if (!user){
+// //             user = new User({
+// //                 name,
+// //                 email,
+// //                 password:"",
+// //                 role:'user',
+// //                 avatar:picture || ""
+// //             })
+
+// //         await user.save()
+
+// //     }
+// //     const token = jwt.sign({id:user._id, role: user.role}, process.env.JWT_SECRET,{expiresIn:"7d"})
+// //     const {password: pw, ...userWithoutPassword} = user._doc
+
+// //     return res.status(200).json({message:"Google login successful",token, user:userWithoutPassword})
+// //     } catch (error) {
+// //         console.error("Google Login Error:", error);
+// //         return res.status(500).json({ message: "Internal Server Error" });
+// //     }
+// // }
+
+// export const googleSignIn = async (req, res) => {
+//     try {
+//         const { tokenId } = req.body;
+//         const ticket = await client.verifyIdToken({
+//             idToken: tokenId,
+//             audience: process.env.GOOGLE_CLIENT_ID
+//         });
+
+//         const { email_verified, name, email, picture } = ticket.getPayload();
+
+//         if (!email_verified) {
+//             return res.status(400).json({ message: "Google email not verified" });
+//         }
+
+//         let user = await User.findOne({ email });
+
+//         if (!user) {
+//             // Create new user
+//             user = new User({
+//                 name,
+//                 email,
+//                 password: "", // no password for Google login
+//                 role: "user",
+//                 avatar: picture || ""
+//             });
+//             await user.save();
+//         }
+
+//         // Generate JWT for both new and existing users
+//         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+//         const { password: pw, ...userWithoutPassword } = user._doc;
+
+//         return res.status(200).json({
+//             message: "Google login successful",
+//             token,
+//             user: userWithoutPassword
+//         });
+
+//     } catch (error) {
+//         console.error("Google Login Error:", error);
+//         return res.status(500).json({ message: "Internal Server Error" });
+//     }
+// };
+
+
+
+
+// //Get all non-admin users (admin only)//
+// export const getAllNonAdminUsers = async (req, res) => {
+//     try {
+//         const users = await User.find({ role: { $ne: "admin" } })
+//         if (!users || users.length === 0) {
+//             return res.status(404).json({ message: "No non-admin users in the Database" })
+//         }
+
+//         return res.status(200).json({ message: "Users", users })
+//     } catch (error) {
+//         console.error(error)
+//         return res.status(500).json({ message: "Internal Server Error" })
+//     }
+// }
+
+// // Get all users (admin only)
+// export const getAllUsers = async (req, res) => {
+//     try {
+//         const users = await User.find()
+//         if (!users || users.length === 0) {
+//             return res.status(404).json({ message: "No Users in the Database" })
+//         }
+
+//         return res.status(200).json({ message: "Users", users })
+//     } catch (error) {
+//         console.error(error)
+//         return res.status(500).json({ message: "Internal Server Error" })
+//     }
+// }
+
+// //Register User
+// export const registerUser = async (req, res) => {
+//     try {
+//         const { name, email, password, role, avatar } = req.body
+//         if (!name || !email || !password) {
+//             return res.status(400).json({ message: "All fields are required" })
+//         }
+
+//         const user = await User.findOne({ email })
+//         if (user) {
+//             return res.status(400).json({ message: "User already exists. Kindly login" })
+//         }
+//         const hashedPassword = await bcrypt.hash(password, 10)
+
+//         const newUser = new User({
+//             name,
+//             email,
+//             password: hashedPassword,
+//             role,
+//             avatar: avatar || ""
+//         })
+//         await newUser.save()
+//         const { password: pw, ...userWithoutPassword } = newUser._doc;
+//         res.status(201).json({ message: "User registered successfully", user: userWithoutPassword });
+//     } catch (error) {
+//         console.error("Register Error:", error);
+//         return res.status(500).json({ message: "Internal Server Error" });
+//     }
+// }
+
+// // Login user
+// export const loginUser = async (req, res) => {
+//     try {
+//         const { email, password } = req.body
+//         if (!email || !password) {
+//             return res.status(400).json({ message: "Email and password are required" })
+//         }
+
+
+//         const user = await User.findOne({ email })
+//         if (!user) return res.status(400).json({ message: "User does not exist. Kindly Register first" })
+
+//         const comparePassword = await bcrypt.compare(password, user.password)
+//         if (!comparePassword) return res.status(401).json({ message: "Invalid Credentials" })
+
+//         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" })
+
+//         const { password: pw, ...userWithoutPassword } = user._doc
+
+//         return res.status(200).json({ message: "Login Successful", token, user: userWithoutPassword })
+
+//     } catch (error) {
+//         console.error("Login Error:", error.message);
+//         res.status(500).json({ message: "Internal Server Error" });
+//     }
+
+// }
+
+
+
+
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
-import dotenv from "dotenv"
-dotenv.config()
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 import User from "../Model/User.js";
 
-//Get all non-admin users (admin only)//
-export const getAllNonAdminUsers = async (req, res)=>{
+dotenv.config();
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// Helper function to generate JWT and return user data
+const generateTokenAndUser = (user) => {
+    const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+    const { password, ...userWithoutPassword } = user._doc;
+    return { token, user: userWithoutPassword };
+};
+
+// ------------------ REGISTER USER ------------------
+export const registerUser = async (req, res) => {
     try {
-        const users = await User.find({role: {$ne : "admin"}})
-        if(!users || users.length === 0){
-            return res.status(404).json({message:"No non-admin users in the Database"})
+        const { name, email, password, role, avatar } = req.body;
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
         }
 
-        return res.status(200).json({message:"Users", users})
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({message:"Internal Server Error"})
-    }
-}
-
-// Get all users (admin only)
-export const getAllUsers = async (req, res)=>{
-    try {
-        const users = await User.find()
-        if(!users || users.length === 0){
-            return res.status(404).json({message:"No Users in the Database"})
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists. Kindly login" });
         }
 
-        return res.status(200).json({message:"Users", users})
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({message:"Internal Server Error"})
-    }
-}
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-//Register User
-export const registerUser = async (req, res)=>{
-    try {
-        const {name, email, password, role} = req.body
-    if(!name || !email || !password){
-        return res.status(400).json({ message: "All fields are required" })
-    }
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role: role || "user",
+            avatar: avatar || ""
+        });
+        await newUser.save();
 
-    const user = await User.findOne({email})
-    if(user){
-        return res.status(400).json({ message: "User already exists. Kindly login" })
-    }
-    const hashedPassword = await bcrypt.hash(password, 10)
+        const { token, user } = generateTokenAndUser(newUser);
+        return res.status(201).json({ message: "User registered successfully", token, user });
 
-    const newUser =new User({
-        name,
-        email,
-        password:hashedPassword,
-        role
-    }) 
-    await newUser.save()
-    const { password: pw, ...userWithoutPassword } = newUser._doc;
-    res.status(201).json({ message: "User registered successfully", user: userWithoutPassword });
     } catch (error) {
         console.error("Register Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
-// Login user
-export const loginUser = async (req, res)=>{
+// ------------------ LOGIN USER ------------------
+export const loginUser = async (req, res) => {
     try {
-        const {email, password} = req.body
-        if(!email || !password){
-            return res.status(400).json({message:"Email and password are required"})
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
         }
 
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ message: "User does not exist. Kindly Register first" });
 
-        const user = await User.findOne({email})
-        if(!user) return res.status(400).json({message:"User does not exist. Kindly Register first"})
-        
-        const comparePassword = await bcrypt.compare(password, user.password)
-        if(!comparePassword) return res.status(401).json({message:"Invalid Credentials"})
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: "Invalid Credentials" });
 
-        const token = jwt.sign({id: user._id, role: user.role}, process.env.JWT_SECRET,{expiresIn:"7d"})
+        const { token, user: userData } = generateTokenAndUser(user);
+        return res.status(200).json({ message: "Login Successful", token, user: userData });
 
-        const {password:pw, ...userWithoutPassword} = user._doc
-
-        return res.status(200).json({message:"Login Successful", token, user: userWithoutPassword})
-        
     } catch (error) {
-        console.error("Login Error:", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Login Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
+};
 
-}
+// ------------------ GOOGLE SIGN-IN ------------------
+export const googleSignIn = async (req, res) => {
+    try {
+        const { tokenId } = req.body;
+
+        const ticket = await client.verifyIdToken({
+            idToken: tokenId,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const { email_verified, name, email, picture } = ticket.getPayload();
+        if (!email_verified) {
+            return res.status(400).json({ message: "Google email not verified" });
+        }
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = new User({
+                name,
+                email,
+                password: "", // Google login doesn't require password
+                role: "user",
+                avatar: picture || ""
+            });
+            await user.save();
+        }
+
+        const { token, user: userData } = generateTokenAndUser(user);
+        return res.status(200).json({ message: "Google login successful", token, user: userData });
+
+    } catch (error) {
+        console.error("Google Login Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+// ------------------ GET ALL NON-ADMIN USERS ------------------
+export const getAllNonAdminUsers = async (req, res) => {
+    try {
+        const users = await User.find({ role: { $ne: "admin" } });
+        if (!users || users.length === 0) {
+            return res.status(404).json({ message: "No non-admin users in the Database" });
+        }
+        return res.status(200).json({ message: "Users", users });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+// ------------------ GET ALL USERS ------------------
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find();
+        if (!users || users.length === 0) {
+            return res.status(404).json({ message: "No Users in the Database" });
+        }
+        return res.status(200).json({ message: "Users", users });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
