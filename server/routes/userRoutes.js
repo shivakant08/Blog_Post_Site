@@ -7,11 +7,12 @@ import {
   registerUser,
 } from "../controllers/userController.js";
 import { authenticate, authorize } from "../Middlewares/auth.js";
+import upload from "../Middlewares/upload.js";
 
 const router = express.Router();
 
 // Public routes
-router.post(`/register`, registerUser);
+router.post(`/register`,upload.single("avatar"), registerUser);
 router.post("/login", loginUser);
 
 //Google OAuth routes

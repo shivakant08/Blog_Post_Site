@@ -208,7 +208,7 @@ const generateTokenAndUser = (user) => {
 // ------------------ REGISTER USER ------------------
 export const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role, avatar } = req.body;
+        const { name, email, password, role} = req.body;
         if (!name || !email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -219,13 +219,14 @@ export const registerUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const avatarUrl = req.file ? `/uploads/${req.file.filename}`:""
 
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
             role: role || "user",
-            avatar: avatar || ""
+            avatar: avatarUrl
         });
         await newUser.save();
 
