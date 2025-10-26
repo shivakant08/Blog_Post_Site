@@ -17,37 +17,84 @@ export const AuthProvider = ({ children }) => {
     //     if (storedUser) setUser(JSON.parse(storedUser))
     // }, [])
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        const storedUser = localStorage.getItem("user")
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser))
+    //     const storedUser = localStorage.getItem("user")
+    //     if (storedUser && token) {
+    //         setUser(JSON.parse(storedUser))
+    //     }
+    //     const fetchUserProfile = async () => {
+    //         // const token = localStorage.getItem("token")
+    //         if (!token) {
+    //             setLoading(false)
+    //             return
+    //         }
+
+    //         try {
+    //             const res = await axios.get("http://localhost:5000/v1/api/profile", {
+    //                 headers: { Authorization: `Bearer ${token}` },
+    //             })
+    //             setUser(res.data.user)
+    //         } catch (error) {
+    //             console.error("Error fetching profile:", error)
+    //             localStorage.removeItem("token")
+    //             localStorage.removeItem("user")
+    //             toast.error("Session expired. Please log in again")
+    //             setUser(null)
+    //         } finally {
+    //             setLoading(false)
+    //         }
+    //     }
+
+    //     fetchUserProfile()
+    // }, [token])
+
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        const storedToken = localStorage.getItem("token");
+
+        // ✅ Load from storage first (instant UI update)
+        if (storedUser && storedToken) {
+            setUser(JSON.parse(storedUser));
         }
+
         const fetchUserProfile = async () => {
-            // const token = localStorage.getItem("token")
-            if (!token) {
-                setLoading(false)
-                return
+            if (!storedToken) {
+                setLoading(false);
+                return;
             }
 
             try {
                 const res = await axios.get("http://localhost:5000/v1/api/profile", {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
-                setUser(res.data.user)
-            } catch (error) {
-                console.error("Error fetching profile:", error)
-                localStorage.removeItem("token")
-                localStorage.removeItem("user")
-                toast.error("Session expired. Please log in again")
-                setUser(null)
-            } finally {
-                setLoading(false)
-            }
-        }
+                    headers: { Authorization: `Bearer ${storedToken}` },
+                });
 
-        fetchUserProfile()
-    }, [token])
+                // ✅ Ensure avatar path consistency
+                const userData = res.data.user;
+                if (userData.avatar && !userData.avatar.startsWith("http")) {
+                    userData.avatar = `http://localhost:5000/${userData.avatar}`;
+                }
+
+                setUser(userData);
+                localStorage.setItem("user", JSON.stringify(userData));
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+
+                // ✅ Only clear storage if token is truly invalid
+                if (error.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    toast.error("Session expired. Please log in again");
+                    setUser(null);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserProfile();
+    }, [token]);
 
     const login = (userData, token, message, showToast = true) => {
 
@@ -70,7 +117,7 @@ export const AuthProvider = ({ children }) => {
         navigate("/")
     }
 
-    const signup = (userData, token, message, showToast= true) => {
+    const signup = (userData, token, message, showToast = true) => {
 
         if (token) {
             localStorage.setItem("token", token)
@@ -82,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user,token, login, logout, signup, loading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, signup, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     )
