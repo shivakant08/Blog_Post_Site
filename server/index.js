@@ -10,6 +10,7 @@ import User from "./Model/User.js"
 import api from "./utils/api.js"
 
 import router from "./routes/userRoutes.js"
+import postRoutes from "./routes/postRoutes.js"
 import "./config/passport.js"
 import passport from "passport"
 dotenv.config()
@@ -32,6 +33,7 @@ app.use(cors({
 app.use(passport.initialize())
 
 app.use(`${api}`, router)
+app.use(`${api}/posts`, postRoutes)
 
 connectDB()
   .then(() => {
