@@ -96,8 +96,18 @@ export const AuthProvider = ({ children }) => {
         fetchUserProfile();
     }, [token]);
 
+    const normalizeAvatar = (avatar) => {
+        if (!avatar) return null;
+        if (avatar.startsWith("http")) return avatar;
+        return `http://localhost:5000/${avatar}`;
+    };
+
+
     const login = (userData, token, message, showToast = true) => {
 
+        if (userData?.avatar) {
+          userData.avatar = normalizeAvatar(userData.avatar)
+        }
         if (token) {
             localStorage.setItem("token", token)
             setToken(token)
@@ -118,6 +128,9 @@ export const AuthProvider = ({ children }) => {
     }
 
     const signup = (userData, token, message, showToast = true) => {
+        if(userData?.avatar){
+            userData.avatar = normalizeAvatar(userData.avatar)
+        }
 
         if (token) {
             localStorage.setItem("token", token)
