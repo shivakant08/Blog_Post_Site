@@ -32,6 +32,7 @@ function App() {
           setIsAuthOpen(true)
         }}
       />
+      <main className='pt-16'>
       <Routes>
 
         <Route path='/' element={ user ? <Navigate to="/home"/> :
@@ -53,6 +54,7 @@ function App() {
         <Route path='/google-success' element={<GoogleSuccess/>}/>
 
       </Routes>
+      </main>
 
 
 
