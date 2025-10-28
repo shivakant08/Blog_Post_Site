@@ -1,5 +1,6 @@
 import Post from "../Model/Post.js"
 import User from "../Model/User.js"
+import redis from "../config/redisClient.js"
 
 //Create a new Post
 export const createPost = async(req, res)=>{
@@ -14,6 +15,8 @@ export const createPost = async(req, res)=>{
             desc,
             author:req.user.id
         })
+
+        await redis.del("all_posts")
         res.status(201).json({message:"Post created successfully",post})
     } catch (error) {
         console.error("Error creating post:",error)
@@ -24,7 +27,17 @@ export const createPost = async(req, res)=>{
 // Get all posts
 export const getAllPosts = async (req, res)=>{
     try {
+        const cacheKey = "all_posts"
+        const cachedPosts = await redis.get(cacheKey)
+        if(cachedPosts){
+            console.log("Serving posts from redis cache")
+            return res.status(200).json(JSON.parse(cachedPosts))
+        }
         const posts = await Post.find().populate("author","name email avatar").sort({createdAt:-1})
+
+       await redis.set(cacheKey, JSON.stringify(posts),"EX", 60)
+
+        console.log("Fetched posts from MongoDB")
         res.status(200).json(posts)
     } catch (error) {
         console.error("Error fetching posts:", error)
@@ -36,9 +49,19 @@ export const getAllPosts = async (req, res)=>{
 export const getPostById = async (req, res)=>{
     try {
         const {id} = req.params
+        const cacheKey = `post:${id}`
+        const cachedPost= await redis.get(cacheKey)
+        if(cachedPost){
+            console.log("Serving post from redis cache")
+            return res.status(200).json(JSON.parse(cachedPost))
+        }
+
         const post = await Post.findById(id).populate("author", "name email avatar")
         if(!post) return res.status(404).json({message:"Post not found"})
         
+        await redis.set(cacheKey, JSON.stringify(post),  "EX:", 120 );
+        console.log("Fetched posts from MongoDB")
+
         res.status(200).json(post)
     } catch (error) {
         console.error("Error fetching post:",error)
@@ -60,10 +83,12 @@ export const toggleLike = async (req, res)=>{
         if(isLiked){
             post.likes.pull(userId)
             await post.save()
+            await redis.del(`post:${id}`)
             return res.json({message:"Post unliked",post})
         }else{
             post.likes.push(userId)
             await post.save()
+            await redis.del(`post:${id}`)
             return res.json({message:"Post liked",post})
         }
     } catch (error) {
@@ -84,6 +109,9 @@ export const deletePost = async (req, res)=>{
         }
 
         await post.deleteOne()
+
+        await redis.del("all_posts")
+        await redis.del(`posts:${id}`)
         res.json({message:"Post deleted successfully"})
     } catch (error) {
        console.error("Error deleting post:",error) 
