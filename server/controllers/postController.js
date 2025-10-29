@@ -10,10 +10,13 @@ export const createPost = async(req, res)=>{
             return res.status(400).json({message:"Title and description are required"})
         }
 
+        const imagePath = req.file? `uploads/${req.file.filename}`:""
+
         const post = await Post.create({
             title, 
             desc,
-            author:req.user.id
+            author:req.user.id,
+            image:imagePath
         })
 
         await redis.del("all_posts")
