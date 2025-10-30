@@ -1,9 +1,10 @@
 import multer from "multer";
 import path from "path"
 
+const uploadPath = path.resolve("uploads")
 const storage = multer.diskStorage({
     destination:(req,file,cb)=>{
-        cb(null, "uploads/")
+        cb(null, uploadPath)
     },
     filename:(req,file,cb)=>{
         const uniqueSuffix = Date.now() + "-" + file.originalname
@@ -12,7 +13,7 @@ const storage = multer.diskStorage({
 })
 
 const fileFilter = (req, file, cb)=>{
-    const allowedTypes = /jpeg|jpg|png|gif/
+    const allowedTypes = /jpeg|jpg|png|gif|webp/
     const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase())
     const mime = allowedTypes.test(file.mimetype)
 
