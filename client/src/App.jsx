@@ -4,15 +4,15 @@ import Header from './Components/Header'
 import AuthModal from './Modal/AuthModal'
 import Dashboard from './Pages/Dashboard'
 import Home from "./Pages/Home"
-import About from "./Pages/About"
-import Blogs from "./Pages/Blogs"
-import MyBlog from "./Pages/MyBlog"
+import Explore from "./Pages/Explore"
+import Users from "./Pages/Users"
+import Profile from "./Pages/Profile"
 import CreatePost from "./Pages/CreatePost"
 import GoogleSuccess from './Pages/GoogleSuccess'
 import ProtectedRoute from './Components/ProtectedRoute'
 import { Toaster } from 'react-hot-toast'
 import { AuthContext } from './context/AuthContext'
-
+import PostDetails from './Pages/PostDetails'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -24,55 +24,96 @@ function App() {
     <>
       <Toaster position='top-right' reverseOrder={false} />
 
-
-
-
       <Header
         onOpenAuthModal={(type) => {
           setAuthType(type)
           setIsAuthOpen(true)
         }}
       />
+
       <main className='pt-16'>
         <Routes>
+          {/* Landing or Auth redirect */}
+          <Route
+            path='/'
+            element={user ? <Navigate to="/home" /> : <Dashboard />}
+          />
 
-          <Route path='/' element={user ? <Navigate to="/home" /> :
-            <Dashboard />
-          } />
-          <Route path='/home' element={<ProtectedRoute>
-            <Home />
-          </ProtectedRoute>} />
-          <Route path='/about' element={<ProtectedRoute>
-            <About />
-          </ProtectedRoute>} />
-          <Route path='/blogs' element={<ProtectedRoute>
-            <Blogs />
-          </ProtectedRoute>} />
-          <Route path='/my-blog' element={<ProtectedRoute>
-            <MyBlog />
-          </ProtectedRoute>} />
-          <Route path='/create-post' element={
-            <ProtectedRoute>
-              <CreatePost />
-            </ProtectedRoute>
-          } />
+          {/* Protected Routes */}
+          <Route
+            path='/home'
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/explore'
+            element={
+              <ProtectedRoute>
+                <Explore />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🆕 Add this route for Explore Post Details */}
+          <Route
+            path='/explore/post/:id'
+            element={
+              <ProtectedRoute>
+                <PostDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/users'
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/profile'
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/create-post'
+            element={
+              <ProtectedRoute>
+                <CreatePost />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/post/:id'
+            element={
+              <ProtectedRoute>
+                <PostDetails />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path='/google-success' element={<GoogleSuccess />} />
-
         </Routes>
       </main>
-
-
 
       <AuthModal
         isOpen={isAuthOpen}
         type={authType}
-        onClose={() => setIsAuthOpen(false)}          // closes modal
-        onSwitch={(newType) => setAuthType(newType)} />
-
-
-
-
+        onClose={() => setIsAuthOpen(false)}
+        onSwitch={(newType) => setAuthType(newType)}
+      />
     </>
   )
 }

@@ -239,7 +239,7 @@ const Header = ({ onOpenAuthModal }) => {
 
   useEffect(() => {
     if (user) {
-      setNavLinks(["Home", "About", "Blogs", "My-Blog"]);
+      setNavLinks(["Home", "Explore", "Users", "Profile"]);
     } else {
       setNavLinks([]);
     }
