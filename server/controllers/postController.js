@@ -59,10 +59,10 @@ export const getPostById = async (req, res)=>{
             return res.status(200).json(JSON.parse(cachedPost))
         }
 
-        const post = await Post.findById(id).populate("author", "name email avatar")
+        const post = await Post.findById(id).populate("author", "name email avatar").populate("comments.user","name avatar")
         if(!post) return res.status(404).json({message:"Post not found"})
         
-        await redis.set(cacheKey, JSON.stringify(post),  "EX:", 120 );
+        await redis.set(cacheKey, JSON.stringify(post), "EX", 120 );
         console.log("Fetched posts from MongoDB")
 
         res.status(200).json(post)
@@ -119,5 +119,65 @@ export const deletePost = async (req, res)=>{
     } catch (error) {
        console.error("Error deleting post:",error) 
        res.status(500).json({message:"Internal server error"})
+    }
+}
+
+// Add a comment to a post
+
+export const addComment = async (req, res)=>{
+    try {
+        const {id} = req.params
+        const {text} = req.body
+
+        if(!text) return res.status(400).json({message:"Comment cannot be empty"})
+        
+        const post = await Post.findById(id)
+        if(!post) return res.status(404).json({message:"Post not found"})
+
+        const newComment = {
+            text,
+            user: req.user.id,
+            createdAt:new Date()
+
+        }
+        post.comments.push(newComment)
+        await post.save()
+
+        const populatedPost = await Post.findById(id).populate("comments.user", "name email")
+
+        await redis.del("all_posts")
+        await redis.del(`post:${id}`)
+
+        const addedComment = populatedPost.comments[populatedPost.comments.length -1]
+        res.status(201).json({message:"Comment added successfully", comment: addedComment})
+    } catch (error) {
+        console.error("Error adding comment:", error)
+        res.status(500).json({message:"Internal server error"})
+    }
+}
+
+// Delete a comment
+
+export const deleteComment= async (req, res)=>{
+    try {
+        const {id,commentId} = req.params
+        const post = await Post.findById(id)
+        if(!post) return res.status(404).json({message:"Post not found"})
+
+        const comment = post.comments.id(commentId)
+        if(!comment) return res.status(404).json({message:"Comment not found"})
+
+        if(comment.user.toString() !== req.user.id){
+            return res.status(403).json({message:"You can only delete your own comments"})
+        }
+        comment.deleteOne()
+        await post.save()
+
+        await redis.del("all_posts")
+        await redis.del(`post:${id}`)
+        res.status(200).json({message:"Comment deleted successfully"})
+    } catch (error) {
+        console.error("Error deleting comment:",error)
+        res.status(500).json({message:"Internal server error"})
     }
 }
