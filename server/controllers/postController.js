@@ -30,18 +30,30 @@ export const createPost = async(req, res)=>{
 // Get all posts
 export const getAllPosts = async (req, res)=>{
     try {
-        const cacheKey = "all_posts"
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 6
+        const skip = (page -1) * limit
+
+        const cacheKey = `posts_page_${page}_${limit}`
         const cachedPosts = await redis.get(cacheKey)
         if(cachedPosts){
             console.log("Serving posts from redis cache")
             return res.status(200).json(JSON.parse(cachedPosts))
         }
-        const posts = await Post.find().populate("author","name email avatar").sort({createdAt:-1})
+        
+        const totalPosts = await Post.countDocuments()
+        const posts = await Post.find().populate("author","name email avatar").sort({createdAt:-1}).skip(skip).limit(limit)
 
-       await redis.set(cacheKey, JSON.stringify(posts),"EX", 60)
+        const response = {
+            posts,
+            totalPosts,
+            currentPage:page,
+            totalPages :Math.ceil(totalPosts/limit)
+        }
+       await redis.set(cacheKey, JSON.stringify(response),"EX", 60)
 
         console.log("Fetched posts from MongoDB")
-        res.status(200).json(posts)
+        res.status(200).json(response)
     } catch (error) {
         console.error("Error fetching posts:", error)
         res.status(500).json({message:"Internal server error"})
