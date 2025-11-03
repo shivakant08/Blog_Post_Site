@@ -48,7 +48,7 @@ const CreatePost = () => {
       setDesc("");
       setImage(null);
       setPreview(null);
-      navigate("/home");
+      navigate("/explore");
     } catch (error) {
       console.error("Error creating post:", error);
       toast.error(error.response?.data?.message || "Failed to create post");
