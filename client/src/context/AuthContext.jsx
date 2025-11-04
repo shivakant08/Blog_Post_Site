@@ -3,147 +3,117 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export const AuthContext = createContext()
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null)
-    const [token, setToken] = useState(localStorage.getItem("token") || "")
-    const [loading, setLoading] = useState(true)
-    const navigate = useNavigate()
+  const BASE_URL = "http://localhost:5000";
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  // ✅ Normalize avatar path
+  const normalizeAvatar = (avatar) => {
+    if (!avatar) return null;
+    if (avatar.startsWith("http")) return avatar; // Google or external URL
+    return `${BASE_URL}${avatar}`; // Local upload
+  };
 
-    // useEffect(() => {
-    //     const storedUser = localStorage.getItem("user")
-    //     if (storedUser) setUser(JSON.parse(storedUser))
-    // }, [])
+  // ✅ Restore user from localStorage or refresh from backend
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
 
-    // useEffect(() => {
+    // Load from storage for instant UI update
+    if (storedUser && storedToken) {
+      const parsedUser = JSON.parse(storedUser);
+      parsedUser.avatar = normalizeAvatar(parsedUser.avatar);
+      setUser(parsedUser);
+    }
 
-    //     const storedUser = localStorage.getItem("user")
-    //     if (storedUser && token) {
-    //         setUser(JSON.parse(storedUser))
-    //     }
-    //     const fetchUserProfile = async () => {
-    //         // const token = localStorage.getItem("token")
-    //         if (!token) {
-    //             setLoading(false)
-    //             return
-    //         }
+    const fetchUserProfile = async () => {
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
 
-    //         try {
-    //             const res = await axios.get("http://localhost:5000/v1/api/profile", {
-    //                 headers: { Authorization: `Bearer ${token}` },
-    //             })
-    //             setUser(res.data.user)
-    //         } catch (error) {
-    //             console.error("Error fetching profile:", error)
-    //             localStorage.removeItem("token")
-    //             localStorage.removeItem("user")
-    //             toast.error("Session expired. Please log in again")
-    //             setUser(null)
-    //         } finally {
-    //             setLoading(false)
-    //         }
-    //     }
+      try {
+        const res = await axios.get(`${BASE_URL}/v1/api/profile`, {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        });
 
-    //     fetchUserProfile()
-    // }, [token])
+        const userData = res.data.user;
+        userData.avatar = normalizeAvatar(userData.avatar);
 
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        const storedToken = localStorage.getItem("token");
-
-        // ✅ Load from storage first (instant UI update)
-        if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          toast.error("Session expired. Please log in again");
+          setUser(null);
         }
-
-        const fetchUserProfile = async () => {
-            if (!storedToken) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const res = await axios.get("http://localhost:5000/v1/api/profile", {
-                    headers: { Authorization: `Bearer ${storedToken}` },
-                });
-
-                // ✅ Ensure avatar path consistency
-                const userData = res.data.user;
-                if (userData.avatar && !userData.avatar.startsWith("http")) {
-                    userData.avatar = `http://localhost:5000/${userData.avatar}`;
-                }
-
-                setUser(userData);
-                localStorage.setItem("user", JSON.stringify(userData));
-            } catch (error) {
-                console.error("Error fetching profile:", error);
-
-                // ✅ Only clear storage if token is truly invalid
-                if (error.response?.status === 401) {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
-                    toast.error("Session expired. Please log in again");
-                    setUser(null);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUserProfile();
-    }, [token]);
-
-    const normalizeAvatar = (avatar) => {
-        if (!avatar) return null;
-        if (avatar.startsWith("http")) return avatar;
-        return `http://localhost:5000/${avatar}`;
+      } finally {
+        setLoading(false);
+      }
     };
 
+    fetchUserProfile();
+  }, [token]);
 
-    const login = (userData, token, message, showToast = true) => {
-
-        if (userData?.avatar) {
-          userData.avatar = normalizeAvatar(userData.avatar)
-        }
-        if (token) {
-            localStorage.setItem("token", token)
-            setToken(token)
-        }
-        if (userData) localStorage.setItem("user", JSON.stringify(userData))
-        setUser(userData)
-        if (showToast) toast.success(message || "Logged in successfully!")
-
+  // ✅ Login method (works for both Google & Manual)
+  const login = (userData, token, message = "Logged in successfully!") => {
+    if (userData?.avatar) {
+      userData.avatar = normalizeAvatar(userData.avatar);
     }
 
-    const logout = () => {
-        localStorage.removeItem("user")
-        localStorage.removeItem("token")
-        setUser(null)
-        setToken("")
-        toast.success("Logged out successfully!")
-        navigate("/")
+    if (token) {
+      localStorage.setItem("token", token);
+      setToken(token);
     }
 
-    const signup = (userData, token, message, showToast = true) => {
-        if(userData?.avatar){
-            userData.avatar = normalizeAvatar(userData.avatar)
-        }
-
-        if (token) {
-            localStorage.setItem("token", token)
-            setToken(token)
-        }
-        if (userData) localStorage.setItem("user", JSON.stringify(userData))
-        setUser(userData)
-        if (showToast) toast.success(message || "Signed up successfully!")
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
     }
 
-    return (
-        <AuthContext.Provider value={{ user, token, login, logout, signup, loading }}>
-            {!loading && children}
-        </AuthContext.Provider>
-    )
-}
+    toast.success(message);
+  };
+
+  // ✅ Signup method
+  const signup = (userData, token, message = "Signed up successfully!") => {
+    if (userData?.avatar) {
+      userData.avatar = normalizeAvatar(userData.avatar);
+    }
+
+    if (token) {
+      localStorage.setItem("token", token);
+      setToken(token);
+    }
+
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
+
+    toast.success(message);
+  };
+
+  // ✅ Logout method
+  const logout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setToken("");
+    toast.success("Logged out successfully!");
+    navigate("/");
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout, signup, loading }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+};
