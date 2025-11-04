@@ -37,7 +37,9 @@ router.get("/profile", authenticate, (req, res)=>{
 })
 
 // Protected routes
-router.get(`/users`, authenticate, authorize("admin"), getAllUsers);
-router.get(`/non-admins`, authenticate, authorize("user", "admin"), getAllNonAdminUsers);
+// router.get(`/users`, authenticate, authorize("admin"), getAllUsers);
+router.get(`/users`, authenticate, getAllNonAdminUsers);
+
+// router.get(`/non-admins`, authenticate, authorize("user", "admin"), getAllNonAdminUsers);
 
 export default router;
