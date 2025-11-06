@@ -5,6 +5,7 @@ import {
   getAllNonAdminUsers,
   loginUser,
   registerUser,
+  getSingleUser,
 } from "../controllers/userController.js";
 import { authenticate, authorize } from "../Middlewares/auth.js";
 import upload from "../Middlewares/upload.js";
@@ -39,6 +40,9 @@ router.get("/profile", authenticate, (req, res)=>{
 // Protected routes
 // router.get(`/users`, authenticate, authorize("admin"), getAllUsers);
 router.get(`/users`, authenticate, getAllNonAdminUsers);
+
+// GET SINGLE USER
+router.get("/users/:id", authenticate, getSingleUser)
 
 // router.get(`/non-admins`, authenticate, authorize("user", "admin"), getAllNonAdminUsers);
 
