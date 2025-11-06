@@ -94,7 +94,7 @@ const Users = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08, duration: 0.5 }}
               whileHover={{ scale: 1.05, y: -6 }}
-              onClick={() => navigate(`/user/${user._id}`)}
+              onClick={() => navigate(`/users/${user._id}`)}
               className='cursor-pointer bg-white/5 rounded-xl border border-gray-800 p-5 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-600/10 backdrop-blur-lg transition-all'
             >
               <div className='flex flex-col items-center text-center'>
@@ -131,7 +131,7 @@ const Users = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => {
                     e.stopPropagation()
-                    navigate(`/user/${user._id}`)
+                    navigate(`/users/${user._id}`)
                   }}
                   className='mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition'
                 >

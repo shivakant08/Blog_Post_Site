@@ -13,6 +13,7 @@ import ProtectedRoute from './Components/ProtectedRoute'
 import { Toaster } from 'react-hot-toast'
 import { AuthContext } from './context/AuthContext'
 import PostDetails from './Pages/PostDetails'
+import UserProfile from './Pages/UserProfile'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -78,6 +79,15 @@ function App() {
           />
 
           <Route
+            path='/users/:id'
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path='/profile'
             element={
               <ProtectedRoute>
@@ -104,7 +114,10 @@ function App() {
             }
           />
 
+          
+
           <Route path='/google-success' element={<GoogleSuccess />} />
+          <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </main>
 

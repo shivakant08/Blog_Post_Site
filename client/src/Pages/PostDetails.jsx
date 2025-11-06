@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axios from "axios"
 import { AuthContext } from '../context/AuthContext'
 import { motion, AnimatePresence } from "framer-motion"
@@ -9,6 +9,7 @@ import { FaHeart, FaRegHeart, FaPaperPlane, FaTrash, FaArrowLeft } from 'react-i
 const PostDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { token, user } = useContext(AuthContext)
   const [post, setPost] = useState(null)
   const [comment, setComment] = useState("")
@@ -89,6 +90,14 @@ const PostDetails = () => {
     }
   }
 
+  const handleBack = ()=>{
+    if(location.state?.fromUserProfile){
+      navigate(`/users/${location.state.userId}`)
+    }else{
+      navigate('/explore')
+    }
+  }
+
   if (loading) {
     return (
       <div className='h-screen flex items-center justify-center text-gray-400 text-lg'>
@@ -142,7 +151,7 @@ const PostDetails = () => {
 
       {/* 🔙 Back Button */}
       <motion.button
-        onClick={() => navigate('/explore')}
+        onClick={handleBack}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="absolute top-10 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-3 text-white hover:bg-blue-600 hover:shadow-lg transition z-50"
