@@ -9,12 +9,15 @@ import { FaHeart, FaRegHeart, FaPaperPlane, FaTrash, FaArrowLeft } from 'react-i
 const PostDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
   const { token, user } = useContext(AuthContext)
   const [post, setPost] = useState(null)
   const [comment, setComment] = useState("")
   const [loading, setLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
+
+  const location = useLocation()
+  const origin = location.state?.from
+  const originUserId = location.state?.userId
 
   useEffect(() => {
     fetchPost()
@@ -90,13 +93,18 @@ const PostDetails = () => {
     }
   }
 
-  const handleBack = ()=>{
-    if(location.state?.fromUserProfile){
-      navigate(`/users/${location.state.userId}`)
-    }else{
-      navigate('/explore')
-    }
+  const handleBack = () => {
+  if (origin === "profile") {
+    return navigate("/profile")
   }
+
+  if (origin === "userProfile") {
+    return navigate(`/users/${originUserId}`)
+  }
+
+  return navigate("/explore")
+}
+
 
   if (loading) {
     return (

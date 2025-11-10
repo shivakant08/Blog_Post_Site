@@ -122,7 +122,14 @@ const UserProfile = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.08, duration: 0.5 }}
                                 whileHover={{ scale: 1.05, y: -6 }}
-                                onClick={()=>navigate(`/post/${post._id}`, {state:{fromUserProfile:true, userId:id}})}
+                                onClick={() =>
+                                    navigate(`/post/${post._id}`, {
+                                        state: {
+                                            from: "userProfile",
+                                            userId: id
+                                        }
+                                    })
+                                }
                                 className='bg-white/5 rounded-xl border border-gray-800 p-5 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-600/10 backdrop-blur-lg transition-all cursor-pointer'
                             >
                                 <h3 className='text-lg font-semibold text-gray-100 mb-2'>

@@ -14,6 +14,8 @@ import { Toaster } from 'react-hot-toast'
 import { AuthContext } from './context/AuthContext'
 import PostDetails from './Pages/PostDetails'
 import UserProfile from './Pages/UserProfile'
+import EditProfile from './Pages/EditProfile'
+import EditPost from './Pages/EditPost'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -110,6 +112,25 @@ function App() {
             element={
               <ProtectedRoute>
                 <PostDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='/edit-profile'
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+
+
+          <Route
+            path='/post/:id/edit'
+            element={
+              <ProtectedRoute>
+                <EditPost/>
               </ProtectedRoute>
             }
           />
