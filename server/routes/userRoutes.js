@@ -6,6 +6,7 @@ import {
   loginUser,
   registerUser,
   getSingleUser,
+  updateUser,
 } from "../controllers/userController.js";
 import { authenticate, authorize } from "../Middlewares/auth.js";
 import upload from "../Middlewares/upload.js";
@@ -13,16 +14,16 @@ import upload from "../Middlewares/upload.js";
 const router = express.Router();
 
 // Public routes
-router.post(`/register`,upload.single("avatar"), registerUser);
+router.post(`/register`, upload.single("avatar"), registerUser);
 router.post("/login", loginUser);
 
 //Google OAuth routes
-router.get("/google", passport.authenticate("google",{scope:["profile","email"]}))
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }))
 
 router.get("/google/callback",
-  passport.authenticate("google",{session:false, failureRedirect: "http://localhost:5173"}),
-  (req, res)=>{
-    const {token, user} = req.user
+  passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173" }),
+  (req, res) => {
+    const { token, user } = req.user
     // res.json({message:"Google login successful", token, user})
     const encodedUser = encodeURIComponent(JSON.stringify(user))
     res.redirect(`http://localhost:5173/google-success?token=${token}&user=${encodedUser}`)
@@ -30,10 +31,10 @@ router.get("/google/callback",
 )
 
 // Get user profile (for logged-in users)
-router.get("/profile", authenticate, (req, res)=>{
+router.get("/profile", authenticate, (req, res) => {
   res.json({
-    message:"User profile fetched successfully",
-    user:req.user
+    message: "User profile fetched successfully",
+    user: req.user
   })
 })
 
@@ -46,4 +47,7 @@ router.get("/users/:id", authenticate, getSingleUser)
 
 // router.get(`/non-admins`, authenticate, authorize("user", "admin"), getAllNonAdminUsers);
 
+
+// UPDATE USER PROFILE
+router.patch("/users/:id", authenticate, upload.single("avatar"), updateUser)
 export default router;

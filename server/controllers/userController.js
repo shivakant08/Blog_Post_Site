@@ -159,12 +159,14 @@ export const getAllNonAdminUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 8
     const skip = (page - 1) * limit
 
+    const loggedInUserId = req.user._id
+
     // console.log("Page:", page, "Limit:", limit, "Skip:", skip)
 
 
-    const totalUsers = await User.countDocuments({ role: { $ne: "admin" } })
+    const totalUsers = await User.countDocuments({ role: { $ne: "admin" },_id:{$ne: loggedInUserId} })
     // console.log("Total users:", totalUsers)
-    const users = await User.find({ role: { $ne: "admin" } })
+    const users = await User.find({ role: { $ne: "admin" },_id:{$ne: loggedInUserId} })
       .sort({createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -214,5 +216,34 @@ export const getSingleUser = async (req, res)=>{
     res.status(200).json({user})
   } catch (err) {
     res.status(500).json({message:"Error fetching user", error: err.message})
+  }
+}
+
+
+// --------------------------------UPDATE USER PROFILE----------------------------------
+export const updateUser = async (req, res)=>{
+  try {
+    const {id} = req.params
+    const updates = {
+      name: req.body.name,
+      bio: req.body.bio || ""
+    }
+
+    if(req.file){
+      updates.avatar = `/uploads/${req.file.filename}`
+    }
+
+    const updated = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true
+    })
+
+    if(!updated){
+      return res.status(404).json({message:"User not found"})
+    }
+
+    res.json({user: updated})
+  } catch (error) {
+    res.status(500).json({message:"Server error "})
   }
 }
