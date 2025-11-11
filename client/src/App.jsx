@@ -34,7 +34,8 @@ function App() {
         }}
       />
 
-      <main className='pt-16'>
+     <main className="min-h-screen pt-[40px]">
+
         <Routes>
           {/* Landing or Auth redirect */}
           <Route
