@@ -16,8 +16,8 @@ router.delete("/:id/comments/:commentId",authenticate, deleteComment)
 
 //--------------------------UPDATE AND DELETE POSTS ROUTES------------------------------------------------
 
-router.put("/post/:id", authenticate, updatePost)
-router.delete("/post/:id", authenticate, deletePost)
+router.put("/:id", authenticate, upload.single("image"), updatePost)
+router.delete("/:id", authenticate, deletePost)
 
 //---------------------GET ALL POST BY USER------------------------------
 router.get("/user/:id", authenticate, getAllPostByUser);

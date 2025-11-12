@@ -235,12 +235,26 @@ export const updatePost = async (req, res) => {
         }
 
         const { title, desc } = req.body
-        if (req.file) post.image = req.file.path
-        post.title = title || post.title
-        post.desc = desc || post.desc
+        if (req.file) {
+            post.image = `uploads/${req.file.filename}`; // consistent format
+        }
+
+        if (title) post.title = title;
+        if (desc) post.desc = desc;
 
         await post.save()
-        res.json({ message: "Post updated successfully", post })
+        
+        await redis.del(`post:${id}`);
+        await redis.del("all_posts");
+
+        res.status(200).json(updatedPost);
+
+        const updatedPost = await Post.findById(id).populate("author", "name email avatar");
+
+        res.status(200).json({
+            message: "Post updated successfully",
+            post: updatedPost,
+        });
     } catch (error) {
         res.status(500).json({ message: error.message })
     }

@@ -2,6 +2,7 @@ import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer"
 import User from "../Model/User.js";
 import fs from "fs";
 import path from "path";
@@ -154,7 +155,7 @@ export const googleSignIn = async (req, res) => {
 
 // ------------------ GET ALL NON-ADMIN USERS ------------------
 export const getAllNonAdminUsers = async (req, res) => {
- try {
+  try {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 8
     const skip = (page - 1) * limit
@@ -164,16 +165,16 @@ export const getAllNonAdminUsers = async (req, res) => {
     // console.log("Page:", page, "Limit:", limit, "Skip:", skip)
 
 
-    const totalUsers = await User.countDocuments({ role: { $ne: "admin" },_id:{$ne: loggedInUserId} })
+    const totalUsers = await User.countDocuments({ role: { $ne: "admin" }, _id: { $ne: loggedInUserId } })
     // console.log("Total users:", totalUsers)
-    const users = await User.find({ role: { $ne: "admin" },_id:{$ne: loggedInUserId} })
-      .sort({createdAt: -1 })
+    const users = await User.find({ role: { $ne: "admin" }, _id: { $ne: loggedInUserId } })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
 
     res.status(200).json({
       success: true,
-      count:users.length,
+      count: users.length,
       users,
       pagination: {
         totalUsers,
@@ -208,28 +209,28 @@ export const getAllUsers = async (req, res) => {
 
 
 //-------------------------GET SINGLE USER---------------------------------
-export const getSingleUser = async (req, res)=>{
+export const getSingleUser = async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params
     const user = await User.findById(id).select("-password")
-    if(!user) return res.status(404).json({message:"User not found"})
-    res.status(200).json({user})
+    if (!user) return res.status(404).json({ message: "User not found" })
+    res.status(200).json({ user })
   } catch (err) {
-    res.status(500).json({message:"Error fetching user", error: err.message})
+    res.status(500).json({ message: "Error fetching user", error: err.message })
   }
 }
 
 
 // --------------------------------UPDATE USER PROFILE----------------------------------
-export const updateUser = async (req, res)=>{
+export const updateUser = async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params
     const updates = {
       name: req.body.name,
       bio: req.body.bio || ""
     }
 
-    if(req.file){
+    if (req.file) {
       updates.avatar = `/uploads/${req.file.filename}`
     }
 
@@ -238,12 +239,73 @@ export const updateUser = async (req, res)=>{
       runValidators: true
     })
 
-    if(!updated){
-      return res.status(404).json({message:"User not found"})
+    if (!updated) {
+      return res.status(404).json({ message: "User not found" })
     }
 
-    res.json({user: updated})
+    res.json({ user: updated })
   } catch (error) {
-    res.status(500).json({message:"Server error "})
+    res.status(500).json({ message: "Server error " })
+  }
+}
+
+
+//----------------------------------FORGOT PASSWORD-------------------------------------------------
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) return res.status(404).json({ message: "User not found" })
+
+    const token = jwt.sign({ id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    )
+
+    const resetLink = `http://localhost:5173/reset-password/${token}`
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      }
+    })
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+      <h3>Reset Your Password</h3>
+      <p>Click the link below to reset your password(valid for 15 minutes):</p>
+      <a href ="${resetLink}" target="_blank">${resetLink}</a>
+      `
+    })
+    res.status(200).json({ message: "Password reset link sent to your email" })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+
+//---------------------------------------RESET PASSWORD---------------------------------------------------
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.id)
+
+    if (!user) return res.status(404).json({ message: "User not found" })
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    user.password = hashedPassword
+
+    await user.save()
+    res.status(200).json({ message: "Password reset successful" })
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "Reset link expired" })
+    }
+    res.status(500).json({ message: error.message })
   }
 }

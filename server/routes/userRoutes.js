@@ -7,6 +7,8 @@ import {
   registerUser,
   getSingleUser,
   updateUser,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/userController.js";
 import { authenticate, authorize } from "../Middlewares/auth.js";
 import upload from "../Middlewares/upload.js";
@@ -51,3 +53,10 @@ router.get("/users/:id", authenticate, getSingleUser)
 // UPDATE USER PROFILE
 router.patch("/users/:id", authenticate, upload.single("avatar"), updateUser)
 export default router;
+
+
+//FORGOT PASSWORD
+router.post("/forgot-password", forgotPassword)
+
+//RESET PASSWORD
+router.post("/reset-password", resetPassword)
