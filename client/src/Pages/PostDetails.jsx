@@ -222,7 +222,7 @@ const PostDetails = () => {
         )}
 
         {/* Description */}
-        <p className="text-gray-300 leading-relaxed mb-6">{post.desc}</p>
+        <p className="whitespace-pre-line text-gray-300 leading-relaxed mb-6">{post.desc}</p>
 
         {/* LIKE BUTTON */}
         <div className="flex items-center gap-3 mb-6">

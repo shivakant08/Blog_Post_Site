@@ -137,10 +137,36 @@ const EditPost = () => {
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               className='w-full p-3 bg-white/10 border border-gray-700 rounded-lg h-40 resize-none focus:border-indigo-500 outline-none text-gray-200'
-            >
-
-            </textarea>
+            ></textarea>
           </div>
+
+          <div>
+            <label className='block text-gray-300 mb-3'>Image</label>
+            {preview && (
+              <img src={preview}
+                alt="preview"
+                className='w-full h-64 object-cover rounded-xl mb-4 border border-gray-800'
+              />
+            )}
+            <label className='flex items-center gap-3 p-3 bg-white/10 border border-gray-700 rounded-lg cursor-pointer hover:bg-white/20 transition text-gray-300'>
+              <FaImage />
+              <span>Choose Image</span>
+              <input
+                type='file'
+                accept='image/*'
+                onChange={handleImageChange}
+                className='hidden'
+              />
+            </label>
+          </div>
+
+          <motion.button
+          whileHover={{scale:1.05}}
+          className='flex items-center justify-center gap-2 p-3 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white text-lg shadow'
+          type='submit'
+          >
+              <FaSave/> Save Changes
+          </motion.button>
         </form>
       </motion.div>
     </main>
