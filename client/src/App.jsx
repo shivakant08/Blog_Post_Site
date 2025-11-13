@@ -16,6 +16,7 @@ import PostDetails from './Pages/PostDetails'
 import UserProfile from './Pages/UserProfile'
 import EditProfile from './Pages/EditProfile'
 import EditPost from './Pages/EditPost'
+import ResetPassword from './Pages/ResetPassword'
 
 function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false)
@@ -34,7 +35,7 @@ function App() {
         }}
       />
 
-     <main className="min-h-screen pt-[40px]">
+      <main className="min-h-screen pt-[40px]">
 
         <Routes>
           {/* Landing or Auth redirect */}
@@ -131,12 +132,20 @@ function App() {
             path='/post/:id/edit'
             element={
               <ProtectedRoute>
-                <EditPost/>
+                <EditPost />
               </ProtectedRoute>
             }
           />
 
-          
+          <Route
+            path='/reset-password/:token'
+            element={
+              <ResetPassword />
+
+            }
+          />
+
+
 
           <Route path='/google-success' element={<GoogleSuccess />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
