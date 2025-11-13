@@ -247,7 +247,7 @@ export const updatePost = async (req, res) => {
         await redis.del(`post:${id}`);
         await redis.del("all_posts");
 
-        res.status(200).json(updatedPost);
+        // res.status(200).json(updatedPost);
 
         const updatedPost = await Post.findById(id).populate("author", "name email avatar");
 
