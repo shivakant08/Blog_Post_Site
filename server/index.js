@@ -26,7 +26,9 @@ app.use("/uploads", express.static(uploadDir))
 app.use(express.json())
 app.use(cors({
 
-    origin:"http://localhost:5173",
+    origin:[
+      "https://blog-post-site-dec8kchrk-shivakants-projects-885e5318.vercel.app/",
+      "http://localhost:5173"],
     credentials: true
 }
 ))
