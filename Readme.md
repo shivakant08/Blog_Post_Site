@@ -44,7 +44,7 @@ NODE-BLOGSITE/
 └── README.md
 
 🛠 Tech Stack
-Frontend
+**Frontend**
 
 React
 Vite
@@ -52,7 +52,7 @@ Tailwind CSS
 React Router
 Context API (Auth)
 
-Backend
+**Backend**
 Node.js
 Express
 MongoDB + Mongoose
@@ -63,8 +63,8 @@ JSON Web Tokens
 Bcrypt
 Multer (file uploads)
 
-🔐 Authentication Flow
-Email/Password Auth
+🔐 **Authentication Flow
+Email/Password Auth**
 
 User registers → Password hashed using bcrypt
 On login → JWT generated → Sent to client
@@ -78,7 +78,7 @@ If new user → create in DB
 Send JWT to frontend
 Frontend stores JWT in localStorage
 
-⚡ Redis Cache
+**⚡ Redis Cache**
 
 Used for:
 
@@ -90,7 +90,7 @@ Redis is connected using:
 redis:alpine
 and accessed via custom helper functions.
 
-🧰 Environment Variables (.env)
+**🧰 Environment Variables (.env)**
 MONGO_URI=your_mongo_connection_string
 MONGO_USERNAME=your_username
 MONGO_PASSWORD=your_password
@@ -107,8 +107,8 @@ EMAIL_PASS=your_app_password
 
 
 Make sure your .env is inside /server and included in .gitignore.
-
-🚀 How to Run the Project (Without Docker)
+**
+🚀 How to Run the Project (Without Docker)**
 1. Start Backend
 cd server
 npm install
@@ -145,7 +145,7 @@ or using Docker:
 
 docker run --name blog_redis -p 6379:6379 redis
 
-🐳 Docker Deployment (Optional)
+**🐳 Docker Deployment (Optional)**
 
 The project includes:
 
@@ -159,13 +159,13 @@ To run with Docker:
 
 docker-compose up --build
 
-⚙️ API Base URL
+**⚙️ API Base URL**
 
 Set in frontend .env or docker-compose:
 
 VITE_API_URL=http://localhost:5000/v1/api
 
-📸 Features Overview
+**📸 Features Overview**
 Users
 
 Register
@@ -200,8 +200,8 @@ Manage users
 
 Manage posts
 
-🌍 Live Deployment (Free Options)
-Frontend (React)
+**🌍 Live Deployment (Free Options)
+Frontend (React)**
 
 Netlify
 
