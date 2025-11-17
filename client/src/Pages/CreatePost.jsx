@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -36,7 +36,7 @@ const CreatePost = () => {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/v1/api/posts", formData, {
+      await api.post("/v1/api/posts", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,

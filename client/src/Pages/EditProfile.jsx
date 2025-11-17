@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import axios from "axios"
+import api from '../utils/api'
 import { AuthContext } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -19,12 +19,14 @@ const EditProfile = () => {
             name: user.name || "",
             bio: user.bio || ""
         })
+        
+        const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://blog-post-site-tkky.onrender.com"
 
        if (user.avatar && user.avatar.trim() !== "") {
             setPreview(
                 user.avatar.startsWith("http")
                     ? user.avatar
-                    : `http://localhost:5000/${user.avatar}`
+                    : `${BASE_URL}${user.avatar}`
             )
         } else {
             setPreview(null)
@@ -46,8 +48,8 @@ const EditProfile = () => {
             fd.append("bio", form.bio)
             if (avatarFile) fd.append("avatar", avatarFile)
 
-            const res = await axios.patch(
-                `http://localhost:5000/v1/api/users/${user._id}`,
+            const res = await api.patch(
+                `/v1/api/users/${user._id}`,
                 fd,
                 {
                     headers: {

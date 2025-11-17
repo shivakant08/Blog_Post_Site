@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import api, {BASE_URL } from "../utils/api"
 import { FaPlus } from "react-icons/fa"
 import { AuthContext } from "../context/AuthContext"
 
@@ -21,8 +21,8 @@ const Explore = () => {
     setLoading(true)
     const fetchPosts = async () => {
       try {
-        const { data } = await axios.get(
-          `http://localhost:5000/v1/api/posts?page=${currentPage}&limit=6`
+        const { data } = await api.get(
+          `/v1/api/posts?page=${currentPage}&limit=6`
         )
         setPosts(data.posts)
         setTotalPages(data.totalPages)
@@ -139,7 +139,7 @@ const Explore = () => {
         {filteredPosts.length > 0 ? (
           filteredPosts.map((post, index) => {
             const image = post.image
-              ? `http://localhost:5000/${post.image}`
+              ? `${BASE_URL}/${post.image}`
               : "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1500&q=80"
 
             return (
@@ -182,7 +182,7 @@ const Explore = () => {
                           post.author?.avatar
                             ? post.author.avatar.startsWith("http")
                               ? post.author.avatar
-                              : `http://localhost:5000/${post.author.avatar}`
+                              : `${BASE_URL}/${post.author.avatar}`
                             : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                         }
                         alt="avatar"

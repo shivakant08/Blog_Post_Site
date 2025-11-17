@@ -3,12 +3,15 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/api";
 
 const Profile = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
+
+   const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   const getAvatarUrl = (avatar, name = "User") => {
     if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
@@ -17,14 +20,14 @@ const Profile = () => {
       )}&background=4F46E5&color=fff`;
     }
     if (avatar.startsWith("http")) return avatar;
-    return `http://localhost:5000${avatar.startsWith("/") ? avatar : `/${avatar}`}`;
+    return `${BASE_URL}${avatar.startsWith("/") ? avatar : `/${avatar}`}`;
   };
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/v1/api/posts/user/${user._id}`,
+        const res = await api.get(
+          `/v1/api/posts/user/${user._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setPosts(res.data.posts || []);
@@ -164,7 +167,7 @@ const Profile = () => {
                 {/* Image */}
                 {post.image ? (
                   <img
-                    src={`http://localhost:5000/${post.image}`}
+                    src={`${BASE_URL}/${post.image}`}
                     alt={post.title}
                     className="w-full h-40 object-cover rounded-lg mb-3"
                   />

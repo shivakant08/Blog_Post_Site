@@ -12,6 +12,7 @@ import {
   FaArrowLeft,
   FaEdit
 } from "react-icons/fa";
+import api from "../utils/api.js"
 
 const PostDetails = () => {
   const { id } = useParams();
@@ -33,9 +34,9 @@ const PostDetails = () => {
 
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/v1/api/posts/${id}`);
+      const res = await api.get(`/v1/api/posts/${id}`);
       setPost(res.data);
-      setIsLiked(res.data.likes.includes(user?._id));
+      setIsLiked(res.data.likes?.includes(user?._id));
     } catch (error) {
       toast.error("Failed to load post");
     } finally {
@@ -44,15 +45,21 @@ const PostDetails = () => {
   };
 
   const handleBack = () => {
+    // if (origin === "profile") return navigate("/profile");
+    // if (origin === "userProfile") return navigate(`/users/${originUserId}`);
+    // return navigate("/explore");
+
     if (origin === "profile") return navigate("/profile");
-    if (origin === "userProfile") return navigate(`/users/${originUserId}`);
-    return navigate("/explore");
+    if (origin === "userProfile" && originUserId) return navigate(`/users/${originUserId}`);
+
+    navigate(-1); // go back safely
+
   };
 
   const toggleLike = async () => {
     try {
-      await axios.put(
-        `http://localhost:5000/v1/api/posts/${id}/like`,
+      await api.put(
+        `/v1/api/posts/${id}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -74,8 +81,8 @@ const PostDetails = () => {
     if (!comment.trim()) return;
 
     try {
-      const res = await axios.post(
-        `http://localhost:5000/v1/api/posts/${id}/comments`,
+      const res = await api.post(
+        `/v1/api/posts/${id}/comments`,
         { text: comment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -86,6 +93,7 @@ const PostDetails = () => {
       }));
 
       setComment("");
+      toast.success("Comment added");
     } catch {
       toast.error("Failed to add comment");
     }
@@ -93,8 +101,8 @@ const PostDetails = () => {
 
   const deleteComment = async (commentId) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/v1/api/posts/${id}/comments/${commentId}`,
+      await api.delete(
+        `/v1/api/posts/${id}/comments/${commentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -112,7 +120,7 @@ const PostDetails = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/v1/api/posts/${id}`, {
+      await api.delete(`/v1/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -125,9 +133,10 @@ const PostDetails = () => {
 
   if (loading) {
     return (
-      <main className="h-screen flex items-center justify-center text-gray-400 text-lg">
+      <main className="h-screen flex items-center justify-center text-gray-400 text-lg bg-[#050505]">
         Loading post...
       </main>
+
     );
   }
 
@@ -182,7 +191,7 @@ const PostDetails = () => {
         {/* Image */}
         {post.image && (
           <img
-            src={`http://localhost:5000/${post.image}`}
+            src={`${import.meta.env.VITE_API_URL}/${post.image}`}
             alt={post.title}
             className="w-full h-80 object-cover rounded-xl mb-5"
           />
@@ -264,7 +273,7 @@ const PostDetails = () => {
           {/* Comment List */}
           <div className="space-y-4">
             <AnimatePresence>
-              {post.comments.map((c) => (
+              {post.comments?.map((c) => (
                 <motion.div
                   key={c._id}
                   initial={{ opacity: 0, y: 10 }}
@@ -277,7 +286,7 @@ const PostDetails = () => {
                     <span className="text-xs text-gray-500">— {c.user?.name}</span>
                   </div>
 
-                  {c.user?._id === user._id && (
+                  {c.user?._id === user?._id && (
                     <motion.button
                       whileHover={{ scale: 1.2 }}
                       onClick={() => deleteComment(c._id)}

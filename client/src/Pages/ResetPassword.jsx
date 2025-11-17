@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import axios from "axios"
+import api from '../utils/api'
 import { toast } from "react-hot-toast"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 
@@ -39,7 +39,7 @@ const ResetPassword = () => {
 
         try {
             setLoading(true)
-            const res = await axios.post("http://localhost:5000/v1/api/reset-password", {
+            const res = await api.post("/v1/api/reset-password", {
                 token,
                 newPassword
             })
@@ -145,7 +145,7 @@ const ResetPassword = () => {
                                 : "bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30"
                             }`}
                     >
-                        {loading ? "Restting..." : "Reset Password"}
+                        {loading ? "Resetting..." : "Reset Password"}
                     </button>
                 </form>
             </motion.div>

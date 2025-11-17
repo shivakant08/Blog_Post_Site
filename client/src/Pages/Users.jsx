@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import axios from "axios"
+import api from '../utils/api'
 import { AuthContext } from '../context/AuthContext'
 
 const Users = () => {
@@ -13,6 +13,8 @@ const Users = () => {
   const navigate = useNavigate()
   const { token } = useContext(AuthContext)
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true)
@@ -22,7 +24,7 @@ const Users = () => {
           console.error('No token available from AuthContext')
           return
         }
-        const { data } = await axios.get(`http://localhost:5000/v1/api/users?page=${page}&limit=8`,
+        const { data } = await api.get(`/v1/api/users?page=${page}&limit=8`,
 
           {
             headers: { Authorization: `Bearer ${token}` }
@@ -106,7 +108,7 @@ const Users = () => {
                           ? user.avatar
                           : user.avatar.startsWith("http")
                             ? user.avatar
-                            : `http://localhost:5000/${user.avatar}`
+                            : `${BASE_URL}/${user.avatar}`
                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=0D8ABC&color=fff`
                     }
 

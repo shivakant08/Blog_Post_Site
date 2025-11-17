@@ -2,11 +2,13 @@ import { createContext, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../utils/api";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const BASE_URL = "http://localhost:5000";
+  // const BASE_URL = "http://localhost:5000";
+  const BASE_URL= import.meta.env.VITE_BASE_URL
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await axios.get(`${BASE_URL}/v1/api/profile`, {
+        const res = await api.get(`/v1/api/profile`, {
           headers: { Authorization: `Bearer ${storedToken}` },
         });
 

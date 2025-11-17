@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios, { formToJSON } from 'axios'
+import api from "../utils/api.js"
 import { AuthContext } from '../context/AuthContext'
 import { motion } from "framer-motion"
 import { toast } from "react-hot-toast"
@@ -24,10 +25,14 @@ const EditPost = () => {
 
   const fetchPost = async () => {
     try {
-      const { data } = await axios.get(`http://localhost:5000/v1/api/posts/${id}`)
+      const { data } = await api.get(`/v1/api/posts/${id}`)
       setTitle(data.title)
       setDesc(data.desc)
-      setPreview(data.image ? `http://localhost:5000/${data.image}` : null)
+      setPreview(
+        data.image
+          ? `${import.meta.env.VITE_API_BASE_URL || "https://blog-post-site-tkky.onrender.com"}${data.image}`
+          : null
+      )
       setOriginalAuthor(data.author?._id)
 
       setLoading(false)
@@ -59,7 +64,7 @@ const EditPost = () => {
     if (image) formData.append("image", image)
 
     try {
-      await axios.put(`http://localhost:5000/v1/api/posts/${id}`,
+      await api.put(`/v1/api/posts/${id}`,
         formData,
         {
           headers: {
@@ -161,11 +166,11 @@ const EditPost = () => {
           </div>
 
           <motion.button
-          whileHover={{scale:1.05}}
-          className='flex items-center justify-center gap-2 p-3 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white text-lg shadow'
-          type='submit'
+            whileHover={{ scale: 1.05 }}
+            className='flex items-center justify-center gap-2 p-3 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white text-lg shadow'
+            type='submit'
           >
-              <FaSave/> Save Changes
+            <FaSave /> Save Changes
           </motion.button>
         </form>
       </motion.div>

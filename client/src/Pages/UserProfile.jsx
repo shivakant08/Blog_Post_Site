@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import { motion } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 
@@ -12,6 +12,8 @@ const UserProfile = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+
   const getAvatarUrl = (avatar, name = "User") => {
     if (!avatar || typeof avatar !== "string" || avatar.trim() === "") {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -19,18 +21,18 @@ const UserProfile = () => {
       )}&background=4F46E5&color=fff`;
     }
     if (avatar.startsWith("http")) return avatar;
-    return `http://localhost:5000${avatar.startsWith("/") ? avatar : `/${avatar}`}`;
+    return `${BASE_URL}${avatar.startsWith("/") ? avatar : `/${avatar}`}`;
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userRes = await axios.get(
-          `http://localhost:5000/v1/api/users/${id}`,
+        const userRes = await api.get(
+          `/v1/api/users/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const postRes = await axios.get(
-          `http://localhost:5000/v1/api/posts/user/${id}`,
+        const postRes = await api.get(
+          `/v1/api/posts/user/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUser(userRes.data.user);

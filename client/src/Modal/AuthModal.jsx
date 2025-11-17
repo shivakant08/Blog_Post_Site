@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
-import axios from "axios";
+import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 
@@ -26,12 +26,12 @@ const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
     e.preventDefault();
     try {
       if (type === "signup") {
-        const res = await axios.post("http://localhost:5000/v1/api/register", formData);
+        const res = await api.post("/register", formData);
         signup(res.data.user, res.data.token, res.data.message);
         toast.success("Account created successfully!");
         onSwitch("signin");
       } else {
-        const res = await axios.post("http://localhost:5000/v1/api/login", {
+        const res = await api.post("/login", {
           email: formData.email,
           password: formData.password,
         });
@@ -47,7 +47,7 @@ const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/v1/api/forgot-password", {
+      await api.post("/forgot-password", {
         email: emailForReset,
       });
       toast.success("Password reset link sent!");
@@ -87,15 +87,15 @@ const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
               {type === "signup"
                 ? "Create Account"
                 : type === "forgot"
-                ? "Reset Password"
-                : "Welcome Back"}
+                  ? "Reset Password"
+                  : "Welcome Back"}
             </h2>
             <p className="text-gray-600 text-center mb-6">
               {type === "signup"
                 ? "Join our blogging community today!"
                 : type === "forgot"
-                ? "Enter your email to reset password."
-                : "Login to continue exploring awesome stories."}
+                  ? "Enter your email to reset password."
+                  : "Login to continue exploring awesome stories."}
             </p>
 
             {type === "forgot" ? (
@@ -162,7 +162,7 @@ const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
                       <option value="" disabled>
                         Select Role
                       </option>
-                      <option value="admin">Admin</option>
+                      <option value="admin" disabled>Admin</option>
                       <option value="user">User</option>
                     </select>
                   </>
@@ -226,7 +226,7 @@ const AuthModal = ({ isOpen, type, onClose, onSwitch }) => {
                 <button
                   type="button"
                   onClick={() =>
-                    window.open("http://localhost:5000/v1/api/google", "_self")
+                    window.open("https://blog-post-site-tkky.onrender.com/v1/api/google", "_self")
                   }
                   className="w-full flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-xl font-medium bg-white hover:bg-gray-50 transition text-gray-800"
                 >
